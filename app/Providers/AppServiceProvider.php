@@ -5,10 +5,9 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Password;
 use RateLimiter;
 use function back;
-use function redirect;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,8 +45,14 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(100)->by($request->ip())->response($loginRateLimitResponse),
                 Limit::perMinute(5)->by($request->input('email'))->response($loginRateLimitResponse)
             ];
+        });
 
+        Password::defaults(function () {
+            if ($this->app->isLocal()) {
+                return Password::min(3);
+            }
 
+            return Password::min(8)->mixedCase()->uncompromised()->letters()->numbers()->symbols();
         });
     }
 }
