@@ -6,8 +6,11 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use RateLimiter;
 use Throwable;
 use function back;
+use function strtolower;
 
 class AuthController extends Controller
 {
@@ -32,7 +35,7 @@ class AuthController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors(['email' => 'These credentials do not match our records']);
+        return back()->withInput()->withErrors(['email' => 'These credentials do not match our records']);
     }
 
     /**
