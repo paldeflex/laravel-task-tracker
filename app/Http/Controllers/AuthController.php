@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Models\User;
+use Hash;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -46,9 +50,23 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register()
+    public function register(RegisterRequest $request)
     {
+        $validated = $request->validated();
 
+        $user = User::create(
+            [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password'])
+            ]
+        );
+
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     public function logout()
